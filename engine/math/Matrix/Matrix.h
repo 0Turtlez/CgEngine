@@ -65,7 +65,7 @@ struct Matrix4 {
             // Partial pivot
             int pivotRow = col;
             for (int k = col + 1; k < n; k++) {
-                if (std::abs(input.matrix[k][col]) > std::abs(input.matrix[pivot][col])) {
+                if (std::abs(input.matrix[k][col]) > std::abs(input.matrix[pivotRow][col])) {
                     pivotRow = k;
                 }
             }

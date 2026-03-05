@@ -23,7 +23,6 @@ void Scene::updateVertexCount(Object* obj, int vertex) {
     for (int v = 0; v < vertex; v++) {
         float current_angle = v * angle_step;
         float radians = current_angle * (PI / 180.0f);
-
         Point point;
         point.x = cos(radians);
         point.y = sin(radians);

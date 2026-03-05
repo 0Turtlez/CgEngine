@@ -5,20 +5,14 @@
 #ifndef ASM1_OBJECT_H
 #define ASM1_OBJECT_H
 #include <vector>
-#include "../engine/math/Transform/Transform.h"
+#include "math/Color/Color.h"
+#include "math/Transform/Transform.h"
 
 // 2D point of a drawn polygon, with default constructor of position 0,0
 struct Point {
     float x, y;
 
     Point(float _x = 0, float _y = 0) : x(_x), y(_y) {}
-};
-
-// RBG color
-struct Color {
-    float r, g, b;
-
-    Color(float _r = 1, float _g = 1, float _b = 1) : r(_r), g(_g), b(_b) {}
 };
 
 // Object holding 2D Object data

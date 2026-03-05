@@ -27,32 +27,13 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="04fe3e27-6672-4340-811b-80ae8478fb4d" name="Changes" comment="added file structure components in prep for refactor">
-      <change afterPath="$PROJECT_DIR$/engine/input/keyboard/Keyboard.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/input/keyboard/Keyboard.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Color/Color.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Color/Color.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/MathUtils/MathUtils.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/MathUtils/MathUtils.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Matrix/Matrix.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Matrix/Matrix.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Random/Random.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Random/Random.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Transform/Transform.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Transform/Transform.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Vector/Vector.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/engine/math/Vector/Vector.h" afterDir="false" />
+    <list default="true" id="04fe3e27-6672-4340-811b-80ae8478fb4d" name="Changes" comment="added Math operators for random, matrixes, vectors, color, and updated src to reflect changes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Camera/Camera.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/engine/rendering/Camera/Camera.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Camera/Camera.h" beforeDir="false" afterPath="$PROJECT_DIR$/engine/rendering/Camera/Camera.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Object/Object.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/engine/core/Object/Object.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Object/Object.h" beforeDir="false" afterPath="$PROJECT_DIR$/engine/core/Object/Object.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Renderer/Renderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/engine/rendering/Renderer/Renderer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Renderer/Renderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/engine/rendering/Renderer/Renderer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Scene/Scene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/engine/scene/Scene/Scene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Scene/Scene.h" beforeDir="false" afterPath="$PROJECT_DIR$/engine/scene/Scene/Scene.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine/core/Object/Object.h" beforeDir="false" afterPath="$PROJECT_DIR$/engine/core/Object/Object.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine/math/MathUtils/MathUtils.h" beforeDir="false" afterPath="$PROJECT_DIR$/engine/math/MathUtils/MathUtils.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine/math/Matrix/Matrix.h" beforeDir="false" afterPath="$PROJECT_DIR$/engine/math/Matrix/Matrix.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine/rendering/Camera/Camera.h" beforeDir="false" afterPath="$PROJECT_DIR$/engine/rendering/Camera/Camera.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine/scene/Scene/Scene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/engine/scene/Scene/Scene.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -176,7 +157,7 @@
       <workItem from="1772645728303" duration="272000" />
       <workItem from="1772646020878" duration="31000" />
       <workItem from="1772646061263" duration="11438000" />
-      <workItem from="1772658974369" duration="27734000" />
+      <workItem from="1772658974369" duration="30117000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -218,7 +199,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772731059467</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="added Math operators for random, matrixes, vectors, color, and updated src to reflect changes">
+      <option name="closed" value="true" />
+      <created>1772746681001</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1772746681001</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -237,7 +226,8 @@
     <MESSAGE value="Refactored project to destroy monolith and started VBO EBO VAO rendering" />
     <MESSAGE value="Fixed Rendering 2D shapes in the 3rd dimension" />
     <MESSAGE value="added file structure components in prep for refactor" />
-    <option name="LAST_COMMIT_MESSAGE" value="added file structure components in prep for refactor" />
+    <MESSAGE value="added Math operators for random, matrixes, vectors, color, and updated src to reflect changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="added Math operators for random, matrixes, vectors, color, and updated src to reflect changes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
