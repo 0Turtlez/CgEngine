@@ -8,7 +8,7 @@ include_directories(/opt/homebrew/include)
 link_directories(/opt/homebrew/lib)
 
 # Include personal libaray
-include_directories(lib)
+include_directories(engine)
 include_directories(include/glad/include)
 
 # Find GLFW and OpenGL
@@ -18,14 +18,28 @@ find_package(OpenGL REQUIRED)
 # Define Executable
 add_executable(lavender main.cpp
         include/glad/src/glad.c
-        lib/Scene/scene.cpp
-        lib/Scene/scene.h
-        lib/Object/object.cpp
-        lib/Object/object.h
-        lib/Renderer/Renderer.cpp
-        lib/Renderer/Renderer.h
-        lib/Camera/Camera.cpp
-        lib/Camera/Camera.h
+        engine/scene/Scene/scene.cpp
+        engine/scene/Scene/scene.h
+        engine/core/Object/Object.cpp
+        engine/core/Object/Object.h
+        engine/Rendering/Renderer/Renderer.cpp
+        engine/Rendering/Renderer/Renderer.h
+        engine/Rendering/Camera/Camera.cpp
+        engine/Rendering/Camera/Camera.h
+        engine/input/keyboard/Keyboard.cpp
+        engine/input/keyboard/Keyboard.h
+        engine/math/MathUtils/MathUtils.cpp
+        engine/math/MathUtils/MathUtils.h
+        engine/math/Vector/Vector.cpp
+        engine/math/Vector/Vector.h
+        engine/math/Transform/Transform.cpp
+        engine/math/Transform/Transform.h
+        engine/math/Random/Random.cpp
+        engine/math/Random/Random.h
+        engine/math/Color/Color.cpp
+        engine/math/Color/Color.h
+        engine/math/Matrix/Matrix.cpp
+        engine/math/Matrix/Matrix.h
 )
 
 # Link Frameworks and Libraries to the 'lavender' target

@@ -5,7 +5,7 @@
 #ifndef ASM1_OBJECT_H
 #define ASM1_OBJECT_H
 #include <vector>
-
+#include "../engine/math/Transform/Transform.h"
 
 // 2D point of a drawn polygon, with default constructor of position 0,0
 struct Point {
@@ -21,27 +21,6 @@ struct Color {
     Color(float _r = 1, float _g = 1, float _b = 1) : r(_r), g(_g), b(_b) {}
 };
 
-// 2D point of the center of the Object
-struct Transform {
-    float x, y;
-
-    Transform(float _x = 0, float _y = 0) : x(_x), y(_y) {}
-};
-
-// Rotation Value
-// z = theta in degrees
-struct Rotation {
-    float z = 0;
-
-    Rotation(float _x = 0) : z(_x) {}
-};
-
-// 2D scaling values
-struct Scale {
-    float x , y ;
-    Scale(float _x = 1, float _y = 1) : x(_x), y(_y) {}
-};
-
 // Object holding 2D Object data
 class Object {
 public:
@@ -52,10 +31,7 @@ public:
     float borderThickness;
 
     // Position Data
-    Transform worldPosition;
-    Transform position;
-    Scale scale;
-    Rotation rotation;
+    Transform transform;
 
     // Constructor
     Object(
@@ -69,7 +45,7 @@ public:
         Rotation _rotation = Rotation()
     );
 
-    static Object createPolygon(int vertex, Color color, bool isFilled, float borderThickness, Transform transform, Scale scale, Rotation rotation);
+    static Object createPolygon(int vertex, Color color, bool isFilled, float borderThickness, Transform transform);
 
 private:
 };

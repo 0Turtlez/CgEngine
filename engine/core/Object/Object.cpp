@@ -16,14 +16,13 @@ Object::Object(
     color(_color),
     isFilled(_isFilled),
     borderThickness(_borderThickness),
-    position(_transform),
-    scale(_scale),
-    rotation(_rotation) {
+    transform(_transform)
+{
 
 }
 
 // Create Object and initialize values
-Object Object::createPolygon(int vertex, Color color, bool isFilled, float borderThickness, Transform transform, Scale scale, Rotation rotation) {
+Object Object::createPolygon(int vertex, Color color, bool isFilled, float borderThickness, Transform transform) {
     std::vector<Point> genPoints;
 
     float angle_step = 360.0 / vertex;
@@ -39,6 +38,6 @@ Object Object::createPolygon(int vertex, Color color, bool isFilled, float borde
         genPoints.push_back(point);
     }
 
-    return Object(genPoints, color, isFilled, borderThickness, transform, scale, rotation);
+    return Object(genPoints, color, isFilled, borderThickness, transform);
 
 }

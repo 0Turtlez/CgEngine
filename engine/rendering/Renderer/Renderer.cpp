@@ -3,7 +3,7 @@
 //
 #define GL_SILENCE_DEPRECATION
 #include "Renderer.h"
-#include "../Object/Object.h"
+#include "../engine/core/Object/Object.h"
 
 #include "glad/glad.h"
 #include <iostream>
@@ -70,8 +70,8 @@ void Renderer::drawScene(Scene &scene) {
         if (object == nullptr) {
             continue;
         }
-        glUniform2f(offsetLoc, object->position.x / 100.0f, object->position.y / 100.0f);
-        glUniform1f(scaleLoc, object->scale.x / 100.0f);
+        glUniform2f(offsetLoc, object->transform.position.x / 100.0f, object->transform.position.y / 100.0f);
+        glUniform1f(scaleLoc, object->transform.scale.x / 100.0f);
         glUniform4f(colorLoc, object->color.r, object->color.g, object->color.b, 1.0f);
 
         if (object->isFilled) {
@@ -175,8 +175,8 @@ void Renderer::setUpVertexObjects(float vertices[], size_t sizeVertices, unsigne
 void Renderer::drawObject(const Object &obj) {
     glUseProgram(shaderProgram);
 
-    glUniform2f(glGetUniformLocation(shaderProgram, "offset"), obj.position.x / 100.0f, obj.position.y / 100.0f);
-    glUniform1f(glGetUniformLocation(shaderProgram, "scale"), obj.scale.x / 100.0f);
+    glUniform2f(glGetUniformLocation(shaderProgram, "offset"), obj.transform.position.x / 100.0f, obj.transform.position.y / 100.0f);
+    glUniform1f(glGetUniformLocation(shaderProgram, "scale"), obj.transform.position.x / 100.0f);
 
     glBindVertexArray(VAO);
 

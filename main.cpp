@@ -18,9 +18,9 @@
 #define GL_SILENCE_DEPRECATION
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "lib/Object/Object.h"
-#include "lib/Scene/Scene.h"
-#include "lib/Renderer/Renderer.h"
+#include "engine/core/Object/Object.h"
+#include "engine/scene/Scene/Scene.h"
+#include "engine/rendering/Renderer/Renderer.h"
 #include <iostream>
 
 

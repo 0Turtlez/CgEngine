@@ -4,7 +4,7 @@
 
 #ifndef ASM1_RENDERER_H
 #define ASM1_RENDERER_H
-#include "Scene/Scene.h"
+#include "../engine/scene/Scene/Scene.h"
 
 
 class Renderer {
