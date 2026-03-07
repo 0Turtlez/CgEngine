@@ -7,8 +7,12 @@
 #include <iostream>
 #include <ostream>
 
+#include "input/keyboard/Keyboard.h"
+#include "input/keycodes/KeyCodes.h"
 #include "rendering/Renderer/Renderer.h"
 
+using namespace lavender::core;
+using namespace lavender::input;
 
 Scene Application::scene;
 double Application::pastTime = 0.0;
@@ -85,7 +89,16 @@ void Application::setupGLFW() {
     }
 
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, Application::framebuffer_size_callback);
+    glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        auto lavenderKey = glfwToLavenderKey(key);
+
+        if (action == GLFW_PRESS) {
+            Keyboard::setKeyState(lavenderKey, true);
+        } else if (action == GLFW_RELEASE) {
+            Keyboard::setKeyState(lavenderKey, false);
+        }
+    });
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 }
 
@@ -102,10 +115,12 @@ void Application::framebuffer_size_callback(GLFWwindow* window, int width, int h
 }
 
 void Application::processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+
+    // Temporary logic, move into scripting or input managment
+    if (Keyboard::isKeyDown(KeyCode::W)) {
         std::cout << "W" << std::endl;
     }
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    if (Keyboard::isKeyDown(KeyCode::Escape)) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
 }

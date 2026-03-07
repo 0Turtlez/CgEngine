@@ -6,7 +6,10 @@
 #ifndef ASM1_SCENE_H
 #define ASM1_SCENE_H
 #include <vector>
-#include "../engine/core/Object/Object.h"
+#include "math/Color/Color.h"
+#include "math/Transform/Transform.h"
+#include "core/Object/Object.h"
+
 
 class Scene {
 public:
@@ -14,10 +17,10 @@ public:
     void update(float deltaTime);          // Ran every frame
     void animateShapes(float deltaTime);   // Experimental logic
 
-    std::vector<Object*> objects;
+    std::vector<lavender::core::Object*> objects;
 
 private:
-    Object *tri, *tri2, *square, *square2, *pen, *pen2,
+    lavender::core::Object *tri, *tri2, *square, *square2, *pen, *pen2,
     *hex, *hex2, *hep, *hep2, *oct, *oct2, *circle, *circle2;
 
     // private state variables
@@ -28,9 +31,9 @@ private:
     float vertexUpdateInterval = 1.0f; // every 1 second
 
     // Eventually add an overload that will create the object for each case of inputs
-    Object* createAndAdd(int vertices, Color color, bool isFilled, float thickness, Transform transform);
+    lavender::core::Object* createAndAdd(int vertices, Color color, bool isFilled, float thickness, Transform transform);
     // Update the count of vertexes of Object
-    void updateVertexCount(Object* obj, int vertex);
+    void updateVertexCount(lavender::core::Object* obj, int vertex);
 };
 
 

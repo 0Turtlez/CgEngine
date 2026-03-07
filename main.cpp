@@ -18,6 +18,7 @@
 #define GL_SILENCE_DEPRECATION
 
 #include "core/Application/Application.h"
+using namespace lavender::core;
 
 int main(int argc, char** argv) {
 

@@ -10,6 +10,8 @@
 #include <ostream>
 #include <GLFW/glfw3.h>
 
+using namespace lavender::core;
+
 #ifndef PI
     #define PI 3.14159265358979323846
 #endif

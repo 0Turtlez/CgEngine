@@ -6,7 +6,6 @@
 #define ASM1_OBJECT_H
 #include <vector>
 
-#include "core/Application/Application.h"
 #include "math/Color/Color.h"
 #include "math/Transform/Transform.h"
 

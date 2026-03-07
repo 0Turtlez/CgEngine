@@ -9,7 +9,7 @@
     #define PI 3.14159265358979323846
 #endif
 
-
+using namespace lavender::core;
 Object::Object(
     const std::vector<Point> &_points, Color _color, bool _isFilled, float _borderThickness, Transform _transform, Scale _scale, Rotation _rotation) :
     points(_points),

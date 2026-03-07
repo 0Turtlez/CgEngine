@@ -3,6 +3,10 @@
 //
 
 #include "Scene.h"
+#include "core/Object/Object.h"
+
+using namespace lavender::core;
+using namespace lavender::math;
 #ifndef PI
     #define PI 3.14159265358979323846
 #endif

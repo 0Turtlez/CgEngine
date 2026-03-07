@@ -44,6 +44,8 @@ add_executable(lavender main.cpp
         engine/math/MathUtils/MathUtils.h
         engine/core/Application/Application.cpp
         engine/core/Application/Application.h
+        engine/input/keycodes/KeyCodes.cpp
+        engine/input/keycodes/KeyCodes.h
 )
 
 if (WIN32)
