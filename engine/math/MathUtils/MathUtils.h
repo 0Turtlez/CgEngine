@@ -4,11 +4,13 @@
 
 #ifndef LAVENDERENGINE_MATHUTILS_H
 #define LAVENDERENGINE_MATHUTILS_H
-#define PI 3.14159265358979323846
-#define E  2.71828182845904523536
-#define TAU (2 * PI)
+
 
 namespace lavender::math{
+    #define PI 3.14159265358979323846
+    #define EULER  2.71828182845904523536
+    #define TAU (2 * PI)
+
     class MathUtils {
         public:
         // Cos sin tangent; decide if i want teh inputs to be deg or radians

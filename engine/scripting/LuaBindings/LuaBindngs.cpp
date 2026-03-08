@@ -7,9 +7,11 @@
 #include "math/Vector/Vector.h"
 #include "math/Transform/Transform.h"
 #include "core/Object/Object.h"
+#include "input/keyboard/Keyboard.h"
 #include "math/Random/Random.h"
 #include "math/MathUtils/MathUtils.h"
 using namespace lavender::math;
+using namespace lavender::input;
 
 void LuaBindngs::setLuaBindings(sol::state &lua) {
     lua.open_libraries(
@@ -147,7 +149,39 @@ void LuaBindngs::setLuaBindings(sol::state &lua) {
         "createAndAdd",  &Scene::createAndAdd
     );
 #pragma endregion Scene-Manangment
+#pragma region Input
+lua.new_enum("KeyCode",
+        "Unknown", KeyCode::Unknown,
+        "A", KeyCode::A, "B", KeyCode::B, "C", KeyCode::C, "D", KeyCode::D,
+        "E", KeyCode::E, "F", KeyCode::F, "G", KeyCode::G, "H", KeyCode::H,
+        "I", KeyCode::I, "J", KeyCode::J, "K", KeyCode::K, "L", KeyCode::L,
+        "M", KeyCode::M, "N", KeyCode::N, "O", KeyCode::O, "P", KeyCode::P,
+        "Q", KeyCode::Q, "R", KeyCode::R, "S", KeyCode::S, "T", KeyCode::T,
+        "U", KeyCode::U, "V", KeyCode::V, "W", KeyCode::W, "X", KeyCode::X,
+        "Y", KeyCode::Y, "Z", KeyCode::Z,
 
+        "D0", KeyCode::D0, "D1", KeyCode::D1, "D2", KeyCode::D2, "D3", KeyCode::D3,
+        "D4", KeyCode::D4, "D5", KeyCode::D5, "D6", KeyCode::D6, "D7", KeyCode::D7,
+        "D8", KeyCode::D8, "D9", KeyCode::D9,
 
+        "Escape", KeyCode::Escape, "Enter", KeyCode::Enter,
+        "Tab", KeyCode::Tab, "Backspace", KeyCode::Backspace,
+        "Insert", KeyCode::Insert, "Delete", KeyCode::Delete,
+
+        "Right", KeyCode::Right, "Left", KeyCode::Left,
+        "Up", KeyCode::Up, "Down", KeyCode::Down,
+
+        "LeftShift", KeyCode::LeftShift, "LeftControl", KeyCode::LeftControl,
+        "LeftAlt", KeyCode::LeftAlt, "LeftSuper", KeyCode::LeftSuper,
+        "RightShift", KeyCode::RightShift, "RightControl", KeyCode::RightControl,
+        "RightAlt", KeyCode::RightAlt, "RightSuper", KeyCode::RightSuper,
+
+        "Space", KeyCode::Space
+    );
+
+    sol::table keyboardTable = lua.create_named_table("Keyboard");
+
+    keyboardTable.set_function("isKeyDown", &Keyboard::isKeyDown);
+#pragma endregion Input
 
 }

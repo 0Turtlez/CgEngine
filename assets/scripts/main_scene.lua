@@ -3,6 +3,8 @@ local testShape = nil
 
 -- The engine calls this once at startup and passes the Scene pointer
 function start(scene_ref)
+    print(Math.abs(-10))
+
     print("--- [LUA] Starting Binding Tests ---")
 
     -- 1. Test Color (Sprite-Control Region)
@@ -44,6 +46,11 @@ end
 
 -- The engine calls this every frame
 function update(deltaTime)
+    if (Keyboard.isKeyDown(KeyCode.E)) then
+        print("E")
+    end
+
+
     if testShape ~= nil then
         -- Test real-time Vector3 and Rotation modifications
         -- Move it to the right and spin it continuously
