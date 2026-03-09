@@ -272,3 +272,15 @@ Keyboard = {}
 ---@param key KeyCode
 ---@return boolean
 function Keyboard.isKeyDown(key) end
+
+
+--- ==================================
+--- Audio
+--- ==================================
+
+---@class Audio
+Audio = {}
+
+--- Plays sound by path
+---@param path string
+function Audio.playSound(path) end

@@ -4,6 +4,7 @@
 
 #include "LuaBindngs.h"
 
+#include "audio/Audio/AudioEngine.h"
 #include "math/Vector/Vector.h"
 #include "math/Transform/Transform.h"
 #include "core/Object/Object.h"
@@ -12,6 +13,7 @@
 #include "math/MathUtils/MathUtils.h"
 using namespace lavender::math;
 using namespace lavender::input;
+using namespace lavender::audio;
 
 void LuaBindngs::setLuaBindings(sol::state &lua) {
     lua.open_libraries(
@@ -183,5 +185,8 @@ lua.new_enum("KeyCode",
 
     keyboardTable.set_function("isKeyDown", &Keyboard::isKeyDown);
 #pragma endregion Input
-
+#pragma region Audio
+    sol::table audioTable = lua.create_named_table("Audio");
+    audioTable.set_function("playSound", &AudioEngine::playSound);
+#pragma endregion Audio
 }

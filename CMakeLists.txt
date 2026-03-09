@@ -10,6 +10,7 @@ endif ()
 # Include personal libaray
 include_directories(engine)
 include_directories(include/glad/include)
+include_directories(include/miniaudio)
 
 # Find GLFW and OpenGL
 find_package(OpenGL REQUIRED)
@@ -49,6 +50,9 @@ add_executable(lavender main.cpp
         engine/input/keycodes/KeyCodes.h
         engine/scripting/LuaBindings/LuaBindngs.cpp
         engine/scripting/LuaBindings/LuaBindngs.h
+        include/miniaudio/miniaudio.h
+        engine/audio/Audio/AudioEngine.cpp
+        engine/audio/Audio/AudioEngine.h
 )
 
 # Link Frameworks and Libraries to the 'lavender' target
@@ -58,4 +62,13 @@ target_link_libraries(lavender
         OpenGL::GL
         sol2::sol2
         unofficial::lua::lua
+        winmm
+)
+
+# Add assets folder
+add_custom_command(TARGET lavender POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:lavender>/assets"
+        COMMENT "Copying assets to the build output directory..."
 )

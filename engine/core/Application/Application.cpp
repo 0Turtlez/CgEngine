@@ -8,6 +8,7 @@
 #include <iostream>
 #include <ostream>
 
+#include "audio/Audio/AudioEngine.h"
 #include "core/Object/Object.h"
 #include "input/keyboard/Keyboard.h"
 #include "input/keycodes/KeyCodes.h"
@@ -29,6 +30,7 @@ void Application::run() {
 
     setupGLFW();
     setupGlad();
+    audio::AudioEngine::init();
     setupLua();
 
   // Setup time
@@ -38,6 +40,7 @@ void Application::run() {
     scene.start();
 
     mainLoop();
+    audio::AudioEngine::shutdown();
 }
 
 void Application::mainLoop() {

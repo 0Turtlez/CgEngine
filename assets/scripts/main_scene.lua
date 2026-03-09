@@ -1,146 +1,134 @@
--- Global references
-local paddle1 = nil
-local paddle2 = nil
-local ball = nil
+-- [[ GLOBAL REFERENCES ]]
+local paddle1, paddle2 = nil, nil
+local transforms = {}      -- Caching the Transform component itself
+local rotations = {}       -- Caching the Rotation component itself
+local velocities = {}      -- Table of {x, y} velocity pairs
 
--- Game variables
+-- [[ STRESS TEST PARAMETERS ]]
+local NUM_BALLS = 1
 local paddleSpeed = 150.0
-local ballVelX = 100.0
-local ballVelY = 100.0
-local screenTop = 100.0
-local screenBottom = -100.0
+local screenTop, screenBottom = 100.0, -100.0
+local goalLimit = 180.0
 
--- The engine calls this once at startup and passes the Scene pointer
+-- [[ STARTUP ]]
 function start(scene_ref)
-    print("--- [LUA] Starting Pong ---")
+    print("--- [LUA] Starting PONG STRESS TEST ---")
+    print("Spawning " .. NUM_BALLS .. " objects. Watch those frame times!")
 
-    -- 1. Create Paddle 1 (Left)
-    local p1Transform = Transform.new()
-    p1Transform.position.x = -165.0
-    p1Transform.position.y = 0.0
-    p1Transform.scale.x = 8.0
-    p1Transform.scale.y = 30.0
-    paddle1 = scene_ref:createAndAdd(4, Color.new(1.0, 0.2, 0.2), true, 0.0, p1Transform)
+    -- 1. Create Paddles
+    local p1T = Transform.new()
+    p1T.position.x, p1T.position.y = -165.0, 0.0
+    p1T.scale.x, p1T.scale.y = 8.0, 30.0
+    paddle1 = scene_ref:createAndAdd(4, Color.new(1.0, 0.2, 0.2), true, 0.0, p1T)
 
-    -- 2. Create Paddle 2 (Right)
-    local p2Transform = Transform.new()
-    p2Transform.position.x = 165.0
-    p2Transform.position.y = 0.0
-    p2Transform.scale.x = 8.0
-    p2Transform.scale.y = 30.0
-    paddle2 = scene_ref:createAndAdd(4, Color.new(0.2, 0.2, 1.0), true, 0.0, p2Transform)
+    local p2T = Transform.new()
+    p2T.position.x, p2T.position.y = 165.0, 0.0
+    p2T.scale.x, p2T.scale.y = 8.0, 30.0
+    paddle2 = scene_ref:createAndAdd(4, Color.new(0.2, 0.2, 1.0), true, 0.0, p2T)
 
-    -- 3. Create the Ball
-    local ballTransform = Transform.new()
-    ballTransform.position.x = 0.0
-    ballTransform.position.y = 0.0
-    ballTransform.scale.x = 5.0
-    ballTransform.scale.y = 5.0
-    -- Let's make the ball an octagon (8 sides)
-    ball = scene_ref:createAndAdd(8, Color.new(1.0, 1.0, 1.0), true, 0.0, ballTransform)
+    -- 2. Create the Swarm
+    for i = 1, NUM_BALLS do
+        local bT = Transform.new()
+        bT.position.x = Random.randomFloat(-50.0, 50.0)
+        bT.position.y = Random.randomFloat(-50.0, 50.0)
+        
+        local s = Random.randomFloat(2.0, 5.0)
+        bT.scale.x, bT.scale.y = s, s
+
+        local newBall = scene_ref:createAndAdd(8, Random.randomColor(), true, 0.0, bT)
+        
+        -- OPTIMIZATION: Cache references to avoid indexing .transform every frame
+        transforms[i] = newBall.transform
+        rotations[i] = newBall.transform.rotation
+        
+        local vx = Random.randomFloat(50.0, 250.0)
+        if Random.randomBool() then vx = -vx end
+        local vy = Random.randomFloat(-200.0, 200.0)
+        
+        velocities[i] = { x = vx, y = vy }
+    end
 end
 
--- A simple helper function to keep paddles on screen
 function clampPaddle(paddle)
-    if paddle.transform.position.y > screenTop then
-        paddle.transform.position.y = screenTop
-    elseif paddle.transform.position.y < screenBottom then
-        paddle.transform.position.y = screenBottom
-    end
+    local pos = paddle.transform.position
+    if pos.y > screenTop then pos.y = screenTop
+    elseif pos.y < screenBottom then pos.y = screenBottom end
 end
 
--- The engine calls this every frame
+-- [[ UPDATE LOOP ]]
 function update(deltaTime)
-    -- ==========================================
-    -- 1. PADDLE MOVEMENT
-    -- ==========================================
+    -- 1. PADDLE INPUT (W/S & Arrows)
+    local p1Pos = paddle1.transform.position
+    if Keyboard.isKeyDown(KeyCode.W) then p1Pos.y = p1Pos.y + (paddleSpeed * deltaTime)
+    elseif Keyboard.isKeyDown(KeyCode.S) then p1Pos.y = p1Pos.y - (paddleSpeed * deltaTime) end
 
-    -- Player 1 (W/S)
-    if Keyboard.isKeyDown(KeyCode.W) then
-        paddle1.transform.position.y = paddle1.transform.position.y + (paddleSpeed * deltaTime)
-    elseif Keyboard.isKeyDown(KeyCode.S) then
-        paddle1.transform.position.y = paddle1.transform.position.y - (paddleSpeed * deltaTime)
-    end
+    local p2Pos = paddle2.transform.position
+    if Keyboard.isKeyDown(KeyCode.Up) then p2Pos.y = p2Pos.y + (paddleSpeed * deltaTime)
+    elseif Keyboard.isKeyDown(KeyCode.Down) then p2Pos.y = p2Pos.y - (paddleSpeed * deltaTime) end
 
-    -- Player 2 (Up/Down)
-    if Keyboard.isKeyDown(KeyCode.Up) then
-        paddle2.transform.position.y = paddle2.transform.position.y + (paddleSpeed * deltaTime)
-    elseif Keyboard.isKeyDown(KeyCode.Down) then
-        paddle2.transform.position.y = paddle2.transform.position.y - (paddleSpeed * deltaTime)
-    end
-
-    -- Keep paddles on the screen
     clampPaddle(paddle1)
     clampPaddle(paddle2)
 
-    -- ==========================================
-    -- 2. BALL MOVEMENT & PHYSICS
-    -- ==========================================
-    if ball ~= nil then
-        -- Move the ball
-        ball.transform.position.x = ball.transform.position.x + (ballVelX * deltaTime)
-        ball.transform.position.y = ball.transform.position.y + (ballVelY * deltaTime)
+    -- Cache Paddle Collision Data once per frame (Fastest)
+    local p1RE = p1Pos.x + paddle1.transform.scale.x
+    local p1LE = p1Pos.x - paddle1.transform.scale.x
+    local p1SY = paddle1.transform.scale.y
+    
+    local p2LE = p2Pos.x - paddle2.transform.scale.x
+    local p2RE = p2Pos.x + paddle2.transform.scale.x
+    local p2SY = paddle2.transform.scale.y
 
-        -- Spin the ball for fun
-        ball.transform.rotation.z = ball.transform.rotation.z + (360.0 * deltaTime)
+    -- 2. THE SWARM PHYSICS LOOP
+    for i = 1, NUM_BALLS do
+        local t = transforms[i]
+        local r = rotations[i]
+        local v = velocities[i]
+        local pos = t.position
+        local scale = t.scale
 
-        -- Bounce off top and bottom walls
-        -- We add the ball's Y scale so it bounces on its edge, not its center
-        if ball.transform.position.y + ball.transform.scale.y > screenTop then
-            ball.transform.position.y = screenTop - ball.transform.scale.y
-            ballVelY = -Math.abs(ballVelY)
-        elseif ball.transform.position.y - ball.transform.scale.y < screenBottom then
-            ball.transform.position.y = screenBottom + ball.transform.scale.y
-            ballVelY = Math.abs(ballVelY)
+        -- Move & Spin (Rotation math is now direct)
+        pos.x = pos.x + (v.x * deltaTime)
+        pos.y = pos.y + (v.y * deltaTime)
+        local spinDir = (v.x > 0 and 1) or -1
+        r.z = r.z + (360.0 * spinDir * deltaTime)
+
+        local radX, radY = scale.x, scale.y
+
+        -- Y-Wall Bounce
+        if pos.y + radY > screenTop then
+            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
+
+            pos.y = screenTop - radY
+            v.y = -math.abs(v.y)
+        elseif pos.y - radY < screenBottom then
+            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
+
+            pos.y = screenBottom + radY
+            v.y = math.abs(v.y)
         end
 
-        -- Define ball radius to make collision exact
-        local ballRadiusX = ball.transform.scale.x
-        local ballRadiusY = ball.transform.scale.y
-
-        -- ==========================================
-        -- Basic Paddle Collision (AABB approximation)
-        -- ==========================================
-
-        -- Check Player 1 (Left)
-        local p1RightEdge = paddle1.transform.position.x + paddle1.transform.scale.x
-        local p1LeftEdge = paddle1.transform.position.x - paddle1.transform.scale.x
-
-        if ball.transform.position.x - ballRadiusX < p1RightEdge and
-                ball.transform.position.x + ballRadiusX > p1LeftEdge and
-                Math.abs(ball.transform.position.y - paddle1.transform.position.y) < (paddle1.transform.scale.y + ballRadiusY) then
-
-            -- SNAP POSITION: Move ball completely out of the paddle
-            ball.transform.position.x = p1RightEdge + ballRadiusX
-
-            ballVelX = Math.abs(ballVelX) -- Force positive X velocity (bounce right)
-            -- Increase speed slightly on hit!
-            ballVelX = ballVelX * 1.05
+        -- Paddle Collision (P1 - Left)
+        if pos.x - radX < p1RE and pos.x + radX > p1LE and math.abs(pos.y - p1Pos.y) < (p1SY + radY) then
+            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
+            pos.x = p1RE + radX
+            v.x = math.abs(v.x) * 1.02
         end
 
-        -- Check Player 2 (Right)
-        local p2LeftEdge = paddle2.transform.position.x - paddle2.transform.scale.x
-        local p2RightEdge = paddle2.transform.position.x + paddle2.transform.scale.x
-
-        if ball.transform.position.x + ballRadiusX > p2LeftEdge and
-                ball.transform.position.x - ballRadiusX < p2RightEdge and
-                Math.abs(ball.transform.position.y - paddle2.transform.position.y) < (paddle2.transform.scale.y + ballRadiusY) then
-
-            -- SNAP POSITION: Move ball completely out of the paddle
-            ball.transform.position.x = p2LeftEdge - ballRadiusX
-
-            ballVelX = -Math.abs(ballVelX) -- Force negative X velocity (bounce left)
-            -- Increase speed slightly on hit!
-            ballVelX = ballVelX * 1.05
+        -- Paddle Collision (P2 - Right)
+        if pos.x + radX > p2LE and pos.x - radX < p2RE and math.abs(pos.y - p2Pos.y) < (p2SY + radY) then
+            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
+            pos.x = p2LE - radX
+            v.x = -math.abs(v.x) * 1.02
         end
 
-        -- Reset if it goes out of bounds (Left/Right goal)
-        if ball.transform.position.x > 200.0 or ball.transform.position.x < -200.0 then
-            ball.transform.position.x = 0.0
-            ball.transform.position.y = 0.0
-            -- Reset speed, send to the side that just scored
-            ballVelX = (ballVelX > 0 and -100.0) or 100.0
-            ballVelY = (Math.abs(ballVelY) > 0 and 100.0) or -100.0
+        -- Goal Reset
+        if pos.x > goalLimit or pos.x < -goalLimit then
+            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
+            pos.x = Random.randomFloat(-20.0, 20.0)
+            pos.y = Random.randomFloat(-50.0, 50.0)
+            v.x = Random.randomFloat(50.0, 200.0)
+            if Random.randomBool() then v.x = -v.x end
+            v.y = Random.randomFloat(-200.0, 200.0)
         end
     end
 end
