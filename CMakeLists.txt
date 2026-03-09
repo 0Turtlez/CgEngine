@@ -62,8 +62,15 @@ target_link_libraries(lavender
         OpenGL::GL
         sol2::sol2
         unofficial::lua::lua
-        winmm
 )
+
+if (WIN32)
+    target_link_libraries(lavender PRIVATE winmm)
+endif ()
+
+if(APPLE)
+    target_link_libraries(lavender PRIVATE "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
+endif()
 
 # Add assets folder
 add_custom_command(TARGET lavender POST_BUILD
