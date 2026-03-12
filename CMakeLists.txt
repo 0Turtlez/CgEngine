@@ -87,11 +87,21 @@ if(APPLE)
 endif()
 
 if (EMSCRIPTEN)
-    # Generate an HTML file to run the engine in the browser
-    set_target_properties(lavender PROPERTIES SUFFIX ".html")
+    set_target_properties(lavender PROPERTIES
+            OUTPUT_NAME "index"
+            SUFFIX ".html"
+    )
 
+    # Optimization Flags for Release Build
+    # -Oz: Aggressive optimization for size
+    # --closure 1: Minifies the JavaScript glue code
+    target_compile_options(lavender PRIVATE "-Oz")
     # Use Emscripten's built-in GLFW3 port and allow memory growth
     target_link_options(lavender PRIVATE
+            "-Oz"
+            "--closure 1"
+            "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/shell.html"
+            "--minify 1"
             "-sUSE_GLFW=3"
             "-sWASM=1"
             "-sALLOW_MEMORY_GROWTH=1"

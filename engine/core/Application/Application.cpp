@@ -51,27 +51,30 @@ void Application::run() {
 void Application::mainLoopStep() {
     double currentTime = glfwGetTime();
     double deltaTime = currentTime - pastTime;
+    pastTime = currentTime;
+
+    // Prevent "Spiral of Death" if a frame takes too long
+    if (deltaTime > 0.25) deltaTime = 0.25;
+
+    static double accumulator = 0.0;
+    accumulator += deltaTime;
 
     processInput(window);
 
-    if (deltaTime >= timePerFrame) {
-        // Update scene by delta time to target fps
-        scene.update(deltaTime);
-
-        // Render
-        // Set background to dark gray
-        glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Renderer::drawScene(scene);
-
-        // Swap buffers and poll
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-        pastTime = currentTime;
+    // Fixed Logic Update: Runs as many times as needed to catch up
+    while (accumulator >= timePerFrame) {
+        scene.update(timePerFrame); // Use the fixed step here
+        accumulator -= timePerFrame;
     }
 
-    glfwPollEvents();
+    // Render: Runs once per browser frame
+    glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    Renderer::drawScene(scene);
+
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 }
 
 void Application::mainLoop() {
