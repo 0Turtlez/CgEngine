@@ -13,9 +13,11 @@ include_directories(include/glad/include)
 include_directories(include/miniaudio)
 include_directories(include/stb_image)
 
-# Find GLFW and OpenGL
-find_package(OpenGL REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
+# Find GLFW and OpenGL, skipped for Emscripten
+if (NOT EMSCRIPTEN)
+    find_package(OpenGL REQUIRED)
+    find_package(glfw3 CONFIG REQUIRED)
+endif ()
 find_package(Lua REQUIRED)
 find_package(sol2 CONFIG REQUIRED)
 
@@ -64,11 +66,17 @@ add_executable(lavender main.cpp
 # Link Frameworks and Libraries to the 'lavender' target
 target_link_libraries(lavender
         PRIVATE
-        glfw
-        OpenGL::GL
         sol2::sol2
         unofficial::lua::lua
 )
+
+if (NOT EMSCRIPTEN)
+    target_link_libraries(lavender
+        PRIVATE
+        glfw
+        OpenGL::GL
+    )
+endif ()
 
 if (WIN32)
     target_link_libraries(lavender PRIVATE winmm)
@@ -78,6 +86,21 @@ if(APPLE)
     target_link_libraries(lavender PRIVATE "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
 endif()
 
+if (EMSCRIPTEN)
+    # Generate an HTML file to run the engine in the browser
+    set_target_properties(lavender PROPERTIES SUFFIX ".html")
+
+    # Use Emscripten's built-in GLFW3 port and allow memory growth
+    target_link_options(lavender PRIVATE
+            "-sUSE_GLFW=3"
+            "-sWASM=1"
+            "-sALLOW_MEMORY_GROWTH=1"
+            "-sMIN_WEBGL_VERSION=2"
+            "-sMAX_WEBGL_VERSION=2"
+            # Preload the assets folder into the virtual file system
+            "--preload-file" "${CMAKE_CURRENT_SOURCE_DIR}/assets@/assets"
+    )
+endif()
 # Add assets folder
 add_custom_command(TARGET lavender POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory

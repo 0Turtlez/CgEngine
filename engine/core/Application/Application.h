@@ -42,6 +42,8 @@ namespace lavender::core {
         static GLFWwindow* window;
 
         static void mainLoop();
+        static void emscripten_callback();
+        static void mainLoopStep();
         static void setupGLFW();
         static void setupGlad();
         static void setupLua();

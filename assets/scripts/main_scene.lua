@@ -1,138 +1,213 @@
--- [[ GLOBAL REFERENCES ]]
-local paddle1, paddle2 = nil, nil
-local transforms = {}      -- Caching the Transform component itself
-local rotations = {}       -- Caching the Rotation component itself
-local velocities = {}      -- Table of {x, y} velocity pairs
+paddle1, paddle2 = nil
+p1Score = 0
+p2Score = 0
+points = {}
+paddleSpeed = 250
+currentScene = nil
 
--- [[ STRESS TEST PARAMETERS ]]
-local NUM_BALLS = 1
-local paddleSpeed = 150.0
-local screenTop, screenBottom = 100.0, -100.0
-local goalLimit = 180.0
+BVX = 150
+BVY = 150
+function start(scene)
+    currentScene = scene
 
--- [[ STARTUP ]]
--- [[ STARTUP ]]
-function start(scene_ref)
-    print("--- [LUA] Starting PONG STRESS TEST ---")
-    print("Spawning " .. NUM_BALLS .. " objects. Watch those frame times!")
 
-    -- 1. Create Paddles
-    local p1T = Transform.new()
-    p1T.position.x, p1T.position.y = -165.0, 0.0
-    p1T.scale.x, p1T.scale.y = 8.0, 30.0
-    paddle1 = scene_ref:createAndAdd(4, Color.new(1.0, 0.2, 0.2), true, 0.0, p1T)
+    print("Start")
 
-    local p2T = Transform.new()
-    p2T.position.x, p2T.position.y = 165.0, 0.0
-    p2T.scale.x, p2T.scale.y = 8.0, 30.0
-    paddle2 = scene_ref:createAndAdd(4, Color.new(0.2, 0.2, 1.0), true, 0.0, p2T)
+    -- Option 1: define the quad and design it your self
+    paddle1 = scene:addSprite("assets/textures/Blank.png", Transform.new())
+    paddle2 = scene:addSprite("assets/textures/Blank.png", Transform.new())
+    ball    = scene:addSprite("assets/textures/Blank.png", Transform.new())
 
-    -- 2. Create the Swarm
-    for i = 1, NUM_BALLS do
-        local bT = Transform.new()
-        bT.position.x = Random.randomFloat(-50.0, 50.0)
-        bT.position.y = Random.randomFloat(-50.0, 50.0)
+    -- Though option 2 feels better how imagine the way this needing to look this
+    -- Object (parent)
+    --- Sprite
+    --- Hitbox
 
-        local s = Random.randomFloat(2.0, 5.0)
-        bT.scale.x, bT.scale.y = s, s
+    -- Initial Color
+    paddle1.color = Color.new(1.0, 0.2, 0.2)
+    paddle2.color = Color.new(0.2, 1.0, 0.2)
+    ball.color    = Color.new(0.2, 0.2, 1.0)
 
-        -- NEW: Spawn the Bean sprite instead of a polygon
-        local newBall = scene_ref:addSprite("assets/textures/Bean.png", bT)
-        newBall.color = Color.new(1.0, 1.0, 1.0) -- Re-apply the randomized color
+    -- Size
+    paddle1.transform.scale.x, paddle1.transform.scale.y = 8, 30
+    paddle2.transform.scale.x, paddle2.transform.scale.y = 8, 30
+    ball.transform.scale.x, ball.transform.scale.y = 5, 5
 
-        -- OPTIMIZATION: Cache references to avoid indexing .transform every frame
-        transforms[i] = newBall.transform
-        rotations[i] = newBall.transform.rotation
+    -- Initial position
+    paddle1.transform.position.x = -170
+    paddle1.transform.position.y = 0
+    paddle2.transform.position.x = 170
+    paddle2.transform.position.y = 0
 
-        local vx = Random.randomFloat(50.0, 250.0)
-        if Random.randomBool() then vx = -vx end
-        local vy = Random.randomFloat(-200.0, 200.0)
-
-        velocities[i] = { x = vx, y = vy }
-    end
+    ball.transform.position.x = 0
+    ball.transform.position.y = 0
+    BVX = 150
+    BVY = 150
 end
 
 function clampPaddle(paddle)
-    local pos = paddle.transform.position
-    if pos.y > screenTop then pos.y = screenTop
-    elseif pos.y < screenBottom then pos.y = screenBottom end
+    if paddle.transform.position.y > 100 then
+        paddle.transform.position.y = 100
+    elseif paddle.transform.position.y < -100 then
+        paddle.transform.position.y = -100
+    end
 end
 
--- [[ UPDATE LOOP ]]
-function update(deltaTime)
-    if Keyboard.isKeyDown(KeyCode.P) then return end
-    -- 1. PADDLE INPUT (W/S & Arrows)
-    local p1Pos = paddle1.transform.position
-    if Keyboard.isKeyDown(KeyCode.W) then p1Pos.y = p1Pos.y + (paddleSpeed * deltaTime)
-    elseif Keyboard.isKeyDown(KeyCode.S) then p1Pos.y = p1Pos.y - (paddleSpeed * deltaTime) end
+function checkCollision(object1, object2)
+    -- Calculate half widths and heights
+    local halfWidth1 = object1.transform.scale.x / 2
+    local halfHeight1 = object1.transform.scale.y / 2
 
-    local p2Pos = paddle2.transform.position
-    if Keyboard.isKeyDown(KeyCode.Up) then p2Pos.y = p2Pos.y + (paddleSpeed * deltaTime)
-    elseif Keyboard.isKeyDown(KeyCode.Down) then p2Pos.y = p2Pos.y - (paddleSpeed * deltaTime) end
+    local halfWidth2 = object2.transform.scale.x / 2
+    local halfHeight2 = object2.transform.scale.y / 2
+
+    -- Calculate edges of object 1
+    local left1 = object1.transform.position.x - halfWidth1
+    local right1 = object1.transform.position.x + halfWidth1
+    local bottom1 = object1.transform.position.y - halfHeight1
+    local top1 = object1.transform.position.y + halfHeight1
+
+    -- Calculate edges of object 2
+    local left2 = object2.transform.position.x - halfWidth2
+    local right2 = object2.transform.position.x + halfWidth2
+    local bottom2 = object2.transform.position.y - halfHeight2
+    local top2 = object2.transform.position.y + halfHeight2
+
+    if left1 < right2 and right1 > left2 and bottom1 < top2 and top1 > bottom2 then
+        return true
+    end
+
+    return false
+end
+
+function update(deltaTime)
+    if Keyboard.isKeyDown(KeyCode.W) then
+        paddle1.transform.position.y = paddle1.transform.position.y + (paddleSpeed * deltaTime)
+    elseif Keyboard.isKeyDown(KeyCode.S) then
+        paddle1.transform.position.y = paddle1.transform.position.y - (paddleSpeed * deltaTime)
+    end
+
+    if Keyboard.isKeyDown(KeyCode.Up) then
+        paddle2.transform.position.y = paddle2.transform.position.y + (paddleSpeed * deltaTime)
+    elseif Keyboard.isKeyDown(KeyCode.Down) then
+        paddle2.transform.position.y = paddle2.transform.position.y - (paddleSpeed * deltaTime)
+    end
 
     clampPaddle(paddle1)
     clampPaddle(paddle2)
 
-    -- Cache Paddle Collision Data once per frame (Fastest)
-    local p1RE = p1Pos.x + paddle1.transform.scale.x
-    local p1LE = p1Pos.x - paddle1.transform.scale.x
-    local p1SY = paddle1.transform.scale.y
+    ball.transform.position.x =  ball.transform.position.x + (BVX * deltaTime)
+    ball.transform.position.y =  ball.transform.position.y + (BVY * deltaTime)
 
-    local p2LE = p2Pos.x - paddle2.transform.scale.x
-    local p2RE = p2Pos.x + paddle2.transform.scale.x
-    local p2SY = paddle2.transform.scale.y
+    if ball.transform.position.y > 100 or ball.transform.position.y < -100 then
+        Audio.playSound("assets/sounds/dragon-studio-clean-minimal-pop-467466.mp3")
 
-    -- 2. THE SWARM PHYSICS LOOP
-    for i = 1, NUM_BALLS do
-        local t = transforms[i]
-        local r = rotations[i]
-        local v = velocities[i]
-        local pos = t.position
-        local scale = t.scale
+        BVY = -BVY
+    end
 
-        -- Move & Spin (Rotation math is now direct)
-        pos.x = pos.x + (v.x * deltaTime)
-        pos.y = pos.y + (v.y * deltaTime)
-        local spinDir = (v.x > 0 and 1) or -1
-        r.z = r.z + (360.0 * spinDir * deltaTime)
+    if ball.transform.position.x > 190 then
+        Audio.playSound("assets/sounds/dragon-studio-ding-402325.mp3")
+        print("Point to player 1", p1Score)
 
-        local radX, radY = scale.x, scale.y
+        local point = currentScene:addSprite("assets/textures/Blank.png", Transform.new())
+        point.color = Color.new(1.0, 0.2, 0.2)
+        point.transform.scale.x, point.transform.scale.y = 5, 5
 
-        -- Y-Wall Bounce
-        if pos.y + radY > screenTop then
-            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
+        point.transform.position.y = 100
+        point.transform.position.x = -20 - (p1Score * 10)
+        p1Score = p1Score + 1
 
-            pos.y = screenTop - radY
-            v.y = -math.abs(v.y)
-        elseif pos.y - radY < screenBottom then
-            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
+        table.insert(points, point)
 
-            pos.y = screenBottom + radY
-            v.y = math.abs(v.y)
+        ball.transform.position.x = 0
+        ball.transform.position.y = 0
+
+        BVY = Random.randomInt(100, 150)
+        BVX = Random.randomInt(100, 150)
+
+        if Random.randomBool() then
+            BVY = -BVY
         end
+        BVX = -BVX
+    end
+    if ball.transform.position.x < -190 then
+        Audio.playSound("assets/sounds/dragon-studio-ding-402325.mp3")
 
-        -- Paddle Collision (P1 - Left)
-        if pos.x - radX < p1RE and pos.x + radX > p1LE and math.abs(pos.y - p1Pos.y) < (p1SY + radY) then
-            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
-            pos.x = p1RE + radX
-            v.x = math.abs(v.x) * 1.02
+
+        print("Point to player 2", p2Score)
+        ball.transform.position.x = 0
+        ball.transform.position.y = 0
+
+        local point = currentScene:addSprite("assets/textures/Blank.png", Transform.new())
+        point.color = Color.new(0.2, 1.0, 0.2)
+        point.transform.scale.x, point.transform.scale.y = 5, 5
+
+        point.transform.position.y = 100
+        point.transform.position.x = 20 + (p2Score * 10)
+
+        p2Score = p2Score + 1
+        --table.insert(points, "test")
+        table.insert(points, point)
+
+        BVY =  Random.randomInt(100, 150)
+        BVX = -Random.randomInt(100, 150)
+
+        if Random.randomBool() then
+            BVY = -BVY
         end
+        BVX = -BVX
+    end
 
-        -- Paddle Collision (P2 - Right)
-        if pos.x + radX > p2LE and pos.x - radX < p2RE and math.abs(pos.y - p2Pos.y) < (p2SY + radY) then
-            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
-            pos.x = p2LE - radX
-            v.x = -math.abs(v.x) * 1.02
-        end
+    if p1Score > 6 or p2Score > 6 then
+        Audio.playSound("assets/sounds/freesound_community-ding-101492.mp3")
 
-        -- Goal Reset
-        if pos.x > goalLimit or pos.x < -goalLimit then
-            Audio.playSound("assets/sounds/dragon-studio-pop-402324.mp3")
-            pos.x = Random.randomFloat(-20.0, 20.0)
-            pos.y = Random.randomFloat(-50.0, 50.0)
-            v.x = Random.randomFloat(50.0, 200.0)
-            if Random.randomBool() then v.x = -v.x end
-            v.y = Random.randomFloat(-200.0, 200.0)
+        reset()
+    end
+    if checkCollision(paddle1, ball) then
+        Audio.playSound("assets/sounds/dragon-studio-clean-minimal-pop-467466.mp3")
+
+        BVX = -BVX
+
+
+        BVX = BVX + Random.randomInt(10, 15)
+
+        if BVY > 0 then
+            BVY = BVY + Random.randomInt(10, 15)
+        else
+            BVY = BVY - Random.randomInt(10, 15)
         end
     end
+    if checkCollision(paddle2, ball) then
+        Audio.playSound("assets/sounds/dragon-studio-clean-minimal-pop-467466.mp3")
+
+        BVX = -BVX
+
+        BVX = BVX - Random.randomInt(10, 15)
+
+        if BVY > 0 then
+            BVY = BVY + Random.randomInt(10, 15)
+        else
+            BVY = BVY - Random.randomInt(10, 15)
+        end
+    end
+end
+
+function reset()
+    paddle1.transform.position.x = -170
+    paddle1.transform.position.y = 0
+    paddle2.transform.position.x = 170
+    paddle2.transform.position.y = 0
+
+    ball.transform.position.x = 0
+    ball.transform.position.y = 0
+    BVX = 150
+    BVY = 150
+
+    for i, point in ipairs(points) do
+        point.transform.position.x = 1000
+    end
+
+    points = {}
+    p1Score = 0
+    p2Score = 0
 end

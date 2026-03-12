@@ -8,12 +8,17 @@
 #include <iostream>
 #include <ostream>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include "audio/Audio/AudioEngine.h"
 #include "core/Object/Object.h"
 #include "input/keyboard/Keyboard.h"
 #include "input/keycodes/KeyCodes.h"
 #include "rendering/Renderer/Renderer.h"
 #include "scripting/LuaBindings/LuaBindngs.h"
+
 
 using namespace lavender::core;
 using namespace lavender::input;
@@ -43,38 +48,53 @@ void Application::run() {
     audio::AudioEngine::shutdown();
 }
 
+void Application::mainLoopStep() {
+    double currentTime = glfwGetTime();
+    double deltaTime = currentTime - pastTime;
+
+    processInput(window);
+
+    if (deltaTime >= timePerFrame) {
+        // Update scene by delta time to target fps
+        scene.update(deltaTime);
+
+        // Render
+        // Set background to dark gray
+        glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Renderer::drawScene(scene);
+
+        // Swap buffers and poll
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+        pastTime = currentTime;
+    }
+
+    glfwPollEvents();
+
+}
+
 void Application::mainLoop() {
     Renderer::setupRenderer();
 
+#ifdef __EMSCRIPTEN__
+    // 0 = match browser fps
+    // 1 = simulate infinite loop
+    emscripten_set_main_loop(emscripten_callback, 0, 1);
+#else
     // Display Loop
     while (!glfwWindowShouldClose(window)) {
-        double currentTime = glfwGetTime();
-        double deltaTime = currentTime - pastTime;
-
-        processInput(window);
-
-        if (deltaTime >= timePerFrame) {
-            // Update scene by delta time to target fps
-            scene.update(deltaTime);
-
-            // Render
-            // Set background to dark gray
-            glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            Renderer::drawScene(scene);
-
-            // Swap buffers and poll
-            glfwSwapBuffers(window);
-            glfwPollEvents();
-            pastTime = currentTime;
-        }
-
-        glfwPollEvents();
+        mainLoopStep();
     }
 
     Renderer::shutdownRenderer();
     // Close Window
     glfwTerminate();
+#endif
+}
+
+void Application::emscripten_callback() {
+    Application::mainLoopStep();
 }
 
 void Application::setupGLFW() {
@@ -82,10 +102,20 @@ void Application::setupGLFW() {
         std::cerr << "Failed to initialize!" << std::endl;
         // Crash App
     }
+#ifdef __EMSCRIPTEN__
+    // GLFW ES
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+#else
     // Sets GLFW version (CORE PROFILE 3.3)
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#endif
+
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif

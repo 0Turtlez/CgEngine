@@ -29,10 +29,10 @@ public:
 
 private:
 
-    sol::function luaUpdateFunc;
+    sol::protected_function luaUpdateFunc;
 
     // Update the count of vertexes of Object
-    void updateVertexCount(lavender::core::Object* obj, int vertex);
+    void updateVertexCount(Object* obj, int vertex);
 
 };
 

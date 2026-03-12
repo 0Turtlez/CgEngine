@@ -21,7 +21,8 @@ void LuaBindngs::setLuaBindings(sol::state &lua) {
     lua.open_libraries(
         sol::lib::base,
         sol::lib::math,
-        sol::lib::package
+        sol::lib::package,
+        sol::lib::table
     );
 
 #pragma region Vectors

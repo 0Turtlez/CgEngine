@@ -29,7 +29,47 @@ private:
     static void drawSprite(const Sprite& sprite, int offsetLoc, int scaleLoc, int colorLoc, int rotationLoc, int aspectLoc);
 
 
-    static inline const char *vertexShaderSource = R"glsl(
+#ifdef EMSCRIPTEN
+    static inline const char* vs_es =
+        "#version 300 es\n" // No spaces allowed before this!
+        "layout (location = 0) in vec2 aPos;"
+        "layout (location = 1) in vec2 aTextureCoord;"
+        "out vec2 TextureCoord;"
+        "uniform vec2 offset;"
+        "uniform vec2 scale;"
+        "uniform float aspectRatio;"
+        "uniform float rotation;"
+        "void main() {"
+        "    vec2 scaledPos = aPos * scale;"
+        "    float cosTheta = cos(rotation);"
+        "    float sinTheta = sin(rotation);"
+        "    vec2 rotatedPos = vec2("
+        "        scaledPos.x * cosTheta - scaledPos.y * sinTheta,"
+        "        scaledPos.x * sinTheta + scaledPos.y * cosTheta"
+        "    );"
+        "    vec2 finalPos = rotatedPos + offset;"
+        "    gl_Position = vec4(finalPos.x / aspectRatio, finalPos.y, 0.0, 1.0);"
+        "    TextureCoord = aTextureCoord;"
+        "}";
+
+    static inline const char* fs_es =
+        "#version 300 es\n"
+        "precision mediump float;"
+        "out vec4 FragColor;"
+        "in vec2 TextureCoord;"
+        "uniform vec4 objColor;"
+        "uniform sampler2D image;"
+        "uniform bool useTexture;"
+        "void main() {"
+        "    if (useTexture) {"
+        "        FragColor = texture(image, TextureCoord) * objColor;"
+        "    } else {"
+        "        FragColor = objColor;"
+        "    }"
+        "}";
+#endif
+
+    static inline const char *vs_core = R"glsl(
         #version 330 core
         layout (location = 0) in vec2 aPos;
         layout (location = 1) in vec2 aTextureCoord;
@@ -61,7 +101,7 @@ private:
             TextureCoord = aTextureCoord;
         }
     )glsl";
-    static inline const char *fragmentShaderSource = R"glsl(
+    static inline const char *fs_core = R"glsl(
         #version 330 core
         out vec4 FragColor;
 
@@ -79,6 +119,14 @@ private:
             }
         }
     )glsl";
+
+#ifdef EMSCRIPTEN
+    static inline const char* vertexShaderSource = vs_es;
+    static inline const char* fragmentShaderSource = fs_es;
+#else
+    static inline const char* vertexShaderSource = vs_core;
+    static inline const char* fragmentShaderSource = fs_core;
+#endif
 };
 
 
